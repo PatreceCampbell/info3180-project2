@@ -1,0 +1,16 @@
+body {
+    padding-top: 5rem;
+}
+
+footer  {
+    padding-top: 20px;
+}
+
+.home{
+    text-align: center;
+}
+
+ul li{
+    list-style-type: none;
+}
+
