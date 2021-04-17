@@ -9,7 +9,7 @@ from app import app
 from flask import render_template, request, redirect, url_for, flash
 from app import app, db, login_manager
 from flask_login import login_user, logout_user, current_user, login_required
-from app.forms import LoginForm
+from app.forms import LoginForm, RegisterForm
 from app.models import Users
 from werkzeug.security import check_password_hash
 
@@ -23,19 +23,19 @@ def about():
     """Render the website's about page."""
     return render_template('about.html')
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def index(path):
-    """
-    Because we use HTML5 history mode in vue-router we need to configure our
-    web server to redirect all routes to index.html. Hence the additional route
-    "/<path:path".
+# @app.route('/', defaults={'path': ''})
+# @app.route('/<path:path>')
+# def index(path):
+#     """
+#     Because we use HTML5 history mode in vue-router we need to configure our
+#     web server to redirect all routes to index.html. Hence the additional route
+#     "/<path:path".
 
-    Also we will render the initial webpage and then let VueJS take control.
-    """
-    return app.send_static_file('index.html')
+#     Also we will render the initial webpage and then let VueJS take control.
+#     """
+#     return app.send_static_file('index.html')
 
-@app.route("/login", methods=["POST"]) #This route must change to /api/auth/login
+@app.route("/login", methods=["GET", "POST"]) #This route must change to /api/auth/login
 def login():
     form = LoginForm()
     if request.method == "POST" and form.validate_on_submit():
@@ -56,10 +56,26 @@ def login():
             return redirect(url_for("home"))
     return render_template("login.html", form=form)
 
-@app.route("/register", methods=["POST"]) 
+@app.route("/register", methods=["GET","POST"]) 
 def register():
+    form = RegisterForm()
 
-    return render_template('register.html')
+    if request.method == "POST" and form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        name = form.name.data
+        email = form.email.data
+        location = form.location.data
+        biography = form.biogrpahy.data
+        photo = form.photo.data
+        filename = secure_filename(photo.filename)
+        photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        return redirect(url_for("home"))
+
+    return render_template('register.html', form=form)
+    
+
 
 @app.route("/api/cars", methods=["GET", "POST"])    
 def cars():
@@ -67,27 +83,30 @@ def cars():
     render_template("cars.html")
     render_template("addcars.html")
 
+
 @app.route("/api/cars/{car_id}", methods=["GET"])
 def car_details(id):
-    render_template("car_details.html")    
+    render_template("car_details.html")   
+
 
 app.route("/api/cars/{car_id}/favourites")
 def add_favourites(id):
     render_template("favourites.html")
 
+
 app.route("/api/search")
 def search():
     render_template("search.html")
+
 
 app.route("/api/user/{user_id")
 def profile():
     render_template("profile.html")
 
+
 app.route("/api/user/{user_id}/favourites")
 def favourites():
     render_template("favourites.html")
-
-
 
 
 @app.route("/api/auth/logout", methods=["POST"])
@@ -97,6 +116,24 @@ def logout():
 
     flash('You have been logged out.', 'danger')
     return redirect(url_for('home'))
+
+
+def get_uploaded_images():
+    rootdir = os.getcwd()
+    photolist = []
+
+    for subdir, dirs, files in os.walk(rootdir + '/uploads'):
+        for file in files:
+            photolist += [file]
+    photolist.pop(0)
+    return photolist
+
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    rootdir2 = os.getcwd()
+
+    return send_from_directory(os.path.join(rootdir2, app.config['UPLOAD_FOLDER']), filename)
+
 
 @login_manager.user_loader
 def load_user(id):

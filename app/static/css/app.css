@@ -6,11 +6,30 @@ footer  {
     padding-top: 20px;
 }
 
-.home{
+#RegisterBody h2, #LoginBody h2{
     text-align: center;
 }
 
-ul li{
-    list-style-type: none;
+#RegisterCard, #LoginCard{
+    padding: 20px;
+    background-color: rgb(214, 214, 214);
+    width: 50%;
+    margin: auto;
+    border-radius: 20px;
+    box-shadow: 5px 5px 2px grey;
 }
+
+#RegisterCard span, #LoginCard span{
+    color: rgb(189, 36, 36);
+}
+
+#RegisterCard .form-group, #LoginCard .form-group{
+    font-weight: bolder;
+}
+
+.RegisterButton, .LoginButton{
+    text-align: center;
+    padding: 5px;
+}
+
 
